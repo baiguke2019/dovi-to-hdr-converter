@@ -13,9 +13,9 @@ def encode_video(input_file, output_file, output_bitrate, encoding_type):
     ]
 
     video_filters = {
-        "hdr10": "scale_npp=format=yuv420p10le,hwdownload,format=yuv420p10le",
-        "sdr": "scale_npp=format=yuv420p,hwdownload,format=yuv420p",
-        "hlg": "scale_npp=format=yuv420p10le,hwdownload,format=yuv420p10le"
+        "hdr10": "scale_cuda=format=yuv420p10le,hwdownload,format=yuv420p10le",
+        "sdr": "scale_cuda=format=yuv420p,hwdownload,format=yuv420p",
+        "hlg": "scale_cuda=format=yuv420p10le,hwdownload,format=yuv420p10le"
     }
 
     x265_params = {
