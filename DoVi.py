@@ -18,13 +18,13 @@ def encode_video(input_file, output_file, output_bitrate, encoding_type):
         "hlg": "hwupload_cuda,scale_npp=out_color_matrix=bt2020:out_color_range=pc:format=yuv420p10le,hwdownload,format=yuv420p10le"
     }
 
-    x265_params = {
-        "hdr10": "repeat-headers=1:sar=1:hrd=1:aud=1:open-gop=0:hdr10=1:sao=0:rect=0:cutree=0:deblock=-3-3:strong-intra-smoothing=0:chromaloc=2:aq-mode=1:vbv-maxrate=160000:vbv-bufsize=160000:max-luma=1023:max-cll=0,0:master-display=G(8500,39850)B(6550,23000)R(35400,15650)WP(15635,16450)L(10000000,1)WP(15635,16450)L(1000000,100%):preset=slow",
-        "sdr": "deblock=-3-3:vbv-bufsize=62500:vbv-maxrate=50000:fast-pskip=0:dct-decimate=0:level=5.1:ref=5:psy-rd=1.05,0.15:subme=11:me=umh:me_range=48:preset=slow",
-        "hlg": "open-gop=0:atc-sei=18:pic_struct=0:preset=slow"
+    nvenc_params = {
+        "hdr10": "preset=slow:profile=main10:cbr=1:bitrate={}:maxrate={}:bufsize={}".format(output_bitrate, output_bitrate, output_bitrate*2),
+        "sdr": "preset=slow:profile=main:cbr=1:bitrate={}:maxrate={}:bufsize={}".format(output_bitrate, output_bitrate, output_bitrate*2),
+        "hlg": "preset=slow:profile=main10:cbr=1:bitrate={}:maxrate={}:bufsize={}".format(output_bitrate, output_bitrate, output_bitrate*2)
     }
 
-    if encoding_type not in video_filters or encoding_type not in x265_params:
+    if encoding_type not in video_filters or encoding_type not in nvenc_params:
         print(f"Invalid encoding type: {encoding_type}")
         return
 
@@ -35,7 +35,8 @@ def encode_video(input_file, output_file, output_bitrate, encoding_type):
         '-map_chapters', '-1',
         '-an', '-sn',
         '-b:v', f'{output_bitrate}k',
-        '-x265-params', x265_params[encoding_type],
+        '-preset', 'slow',
+        '-profile:v', 'main10' if encoding_type != 'sdr' else 'main',
         f'{output_file}_{encoding_type}_slow.mp4'
     ]
 
