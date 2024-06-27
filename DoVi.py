@@ -13,18 +13,20 @@ def encode_video(input_file, output_file, output_bitrate, encoding_type):
     ]
 
     video_filters = {
-        "hdr10": "hwupload_cuda,scale_npp=format=yuv420p10le,hwdownload,format=yuv420p10le",
-        "sdr": "hwupload_cuda,scale_npp=format=yuv420p,hwdownload,format=yuv420p",
-        "hlg": "hwupload_cuda,scale_npp=format=yuv420p10le,hwdownload,format=yuv420p10le"
+        "hdr10": "format=p010le,hwupload_cuda",
+        "sdr": "format=yuv420p,hwupload_cuda",
+        "hlg": "format=p010le,hwupload_cuda"
     }
 
-    nvenc_params = {
-        "hdr10": "preset=slow:profile=main10:cbr=1:bitrate={}:maxrate={}:bufsize={}".format(output_bitrate, output_bitrate, output_bitrate*2),
-        "sdr": "preset=slow:profile=main:cbr=1:bitrate={}:maxrate={}:bufsize={}".format(output_bitrate, output_bitrate, output_bitrate*2),
-        "hlg": "preset=slow:profile=main10:cbr=1:bitrate={}:maxrate={}:bufsize={}".format(output_bitrate, output_bitrate, output_bitrate*2)
-    }
+    nvenc_params = [
+        '-preset', 'slow',
+        '-profile:v', 'main10' if encoding_type != 'sdr' else 'main',
+        '-b:v', f'{output_bitrate}k',
+        '-maxrate:v', f'{output_bitrate}k',
+        '-bufsize:v', f'{output_bitrate*2}k'
+    ]
 
-    if encoding_type not in video_filters or encoding_type not in nvenc_params:
+    if encoding_type not in video_filters:
         print(f"Invalid encoding type: {encoding_type}")
         return
 
@@ -33,12 +35,8 @@ def encode_video(input_file, output_file, output_bitrate, encoding_type):
         '-vf', video_filters[encoding_type],
         '-c:v', 'hevc_nvenc',
         '-map_chapters', '-1',
-        '-an', '-sn',
-        '-b:v', f'{output_bitrate}k',
-        '-preset', 'slow',
-        '-profile:v', 'main10' if encoding_type != 'sdr' else 'main',
-        f'{output_file}_{encoding_type}_slow.mp4'
-    ]
+        '-an', '-sn'
+    ] + nvenc_params + [f'{output_file}_{encoding_type}_slow.mp4']
 
     subprocess.run(ffmpeg_cmd)
 
