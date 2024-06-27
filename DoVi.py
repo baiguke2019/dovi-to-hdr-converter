@@ -3,19 +3,19 @@ import subprocess
 
 def encode_video(input_file, output_file, output_bitrate, encoding_type):
     common_params = [
-        'ffmpeg.exe',
+        'ffmpeg',
         '-nostdin',
         '-loglevel', 'error',
         '-stats',
         '-y',
-        '-init_hw_device', 'vulkan=vulkan',
-        '-filter_hw_device', 'vulkan'
+        '-hwaccel', 'cuda',
+        '-hwaccel_output_format', 'cuda'
     ]
 
     video_filters = {
-        "hdr10": "hwupload,libplacebo=peak_detect=false:colorspace=9:color_primaries=9:color_trc=16:range=tv:format=yuv420p10le,hwdownload,format=yuv420p10le",
-        "sdr": "hwupload,libplacebo=peak_detect=false:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=tv:format=yuv420p10le,hwdownload,format=yuv420p10le",
-        "hlg": "hwupload,libplacebo=iw:ih:format=yuv420p10le:format=rgb48le"
+        "hdr10": "scale_npp=format=yuv420p10le,hwdownload,format=yuv420p10le",
+        "sdr": "scale_npp=format=yuv420p,hwdownload,format=yuv420p",
+        "hlg": "scale_npp=format=yuv420p10le,hwdownload,format=yuv420p10le"
     }
 
     x265_params = {
@@ -31,7 +31,7 @@ def encode_video(input_file, output_file, output_bitrate, encoding_type):
     ffmpeg_cmd = common_params + [
         '-i', input_file,
         '-vf', video_filters[encoding_type],
-        '-c:v', 'libx265',
+        '-c:v', 'hevc_nvenc',
         '-map_chapters', '-1',
         '-an', '-sn',
         '-b:v', f'{output_bitrate}k',
