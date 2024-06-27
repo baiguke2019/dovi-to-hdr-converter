@@ -13,9 +13,9 @@ def encode_video(input_file, output_file, output_bitrate, encoding_type):
     ]
 
     video_filters = {
-        "hdr10": "hwupload_cuda,scale_npp=out_color_matrix=bt2020:out_color_range=pc:format=yuv420p10le,hwdownload,format=yuv420p10le",
-        "sdr": "hwupload_cuda,scale_npp=out_color_matrix=bt709:out_color_range=pc:format=yuv420p,hwdownload,format=yuv420p",
-        "hlg": "hwupload_cuda,scale_npp=out_color_matrix=bt2020:out_color_range=pc:format=yuv420p10le,hwdownload,format=yuv420p10le"
+        "hdr10": "hwupload_cuda,scale_npp=format=yuv420p10le,hwdownload,format=yuv420p10le",
+        "sdr": "hwupload_cuda,scale_npp=format=yuv420p,hwdownload,format=yuv420p",
+        "hlg": "hwupload_cuda,scale_npp=format=yuv420p10le,hwdownload,format=yuv420p10le"
     }
 
     nvenc_params = {
